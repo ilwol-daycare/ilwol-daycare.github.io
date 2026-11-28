@@ -743,7 +743,7 @@ const GROUPS = [
     { id: 'heroCap2', label: '이미지 2 설명 글(한 줄)', ph: '예) 퍼즐을 맞추며 생각을 깨우는 시간', help: '화면에는 보이지 않고 이미지 대체 텍스트(검색·화면 읽기)로 쓰여요. 올린 이미지에 맞게 써 주세요. 비우면 설명 글 없이 나와요.' },
     { id: 'heroImage3', type: 'photo', label: '첫 화면 이미지 3', def: '', help: '센터마다 AI로 새로 만든 이미지를 넣으세요. 가로형(16:9) 권장 — 올리면 1400×788로 자동으로 맞춰져요. 비워 두면 제작기의 기본 예시 이미지가 나와요. 실제 어르신 사진·얼굴은 올리지 마세요.' },
     { id: 'heroCap3', label: '이미지 3 설명 글(한 줄)', ph: '예) 퍼즐을 맞추며 생각을 깨우는 시간', help: '화면에는 보이지 않고 이미지 대체 텍스트(검색·화면 읽기)로 쓰여요. 올린 이미지에 맞게 써 주세요. 비우면 설명 글 없이 나와요.' },
-    { id: 'heroImage4', type: 'photo', label: '첫 화면 이미지 4', def: '', help: '1~3번을 올리고 이 칸을 비우면 첫 화면 사진이 3장만 나와요. 센터마다 AI로 새로 만든 이미지를 넣으세요. 가로형(16:9) 권장 — 올리면 1400×788로 자동으로 맞춰져요. 비워 두면 제작기의 기본 예시 이미지가 나와요. 실제 어르신 사진·얼굴은 올리지 마세요.' },
+    { id: 'heroImage4', type: 'photo', label: '첫 화면 이미지 4', def: '', help: '첫 화면 사진은 기본 3장이에요. 이 칸에 올렸을 때만 4번째 사진이 나와요(비우면 3장). 센터마다 AI로 새로 만든 이미지를 넣으세요. 가로형(16:9) 권장 — 올리면 1400×788로 자동으로 맞춰져요. 실제 어르신 사진·얼굴은 올리지 마세요.' },
     { id: 'heroCap4', label: '이미지 4 설명 글(한 줄)', ph: '예) 퍼즐을 맞추며 생각을 깨우는 시간', help: '화면에는 보이지 않고 이미지 대체 텍스트(검색·화면 읽기)로 쓰여요. 올린 이미지에 맞게 써 주세요. 비우면 설명 글 없이 나와요.' },
     { id: 'aiNote', type: 'check', label: '"AI로 만든 예시 이미지" 안내 문구 넣기 (권장)', def: true, help: '실제 센터 모습으로 오해하지 않도록 이미지 아래에 작은 글씨로 나와요.' },
     { id: 'aiBadge', type: 'check', label: '사진 위에도 AI 표시 글자 붙이기', def: false, help: '끄면(처음 값) 사진을 가리지 않고, 사진 아래에 작은 안내 글만 나와요. 첫 화면·돌봄 카드·시설 사진에 모두 적용돼요.' },
@@ -1575,7 +1575,7 @@ const HERO_PHOTO = [
   { file: 'hero-4.webp', pos: '50% 50%', alt: '칸칸이 밥·국·반찬을 담은 따뜻한 식판', cap: '따뜻하게 차려 내는 정성 담은 한 끼' }
 ];
 /* 보여 줄 첫 화면 사진 칸: 1~3번을 올리고 4번을 비우면 3장만 (2026-11-28). 그 밖에는 빈 칸에 기본 예시 사진 */
-const heroSlots = d => [1, 2, 3].every(n => imgOk(d['heroImage' + n])) && !String(d.heroImage4 || '') ? HERO_PHOTO.slice(0, 3) : HERO_PHOTO;
+const heroSlots = d => String(d.heroImage4 || '') ? HERO_PHOTO : HERO_PHOTO.slice(0, 3);   /* 2026-11-28 사용자: 첫 화면은 기본 3장(식판 사진 뺌), 4번 칸에 올렸을 때만 4장 */
 function heroFiles(d) {
   if (d.heroStyle === 'illust') return [];
   return heroSlots(d).filter((p, i) => !String(d['heroImage' + (i + 1)] || '')).map(p => { const bin = atob(HERO_IMGS[p.file]), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return { name: 'img/' + p.file, data: a }; });
@@ -1999,7 +1999,7 @@ function buildPage(d, opt) {
       <button class="s-arrow s-prev" type="button" aria-label="이전 그림">‹</button>
       <button class="s-arrow s-next" type="button" aria-label="다음 그림">›</button>
       <div class="s-dots"></div>
-    </div>${photo && d.aiNote && !d.aiBadge && d.aiNoteBelow !== false ?'\n    <p class="note ai-note">※ 첫 화면 사진은 AI로 만든 예시 이미지이며 실제 ' + (isNursing(d) ? '시설' : '센터') + '의 모습과 다를 수 있습니다.</p>' : ''}
+    </div>${photo && d.aiNote && !d.aiBadge && d.aiNoteBelow !== false ?'\n    <p class="note ai-note">※ 위 사진은 AI로 만든 예시 이미지이며 실제 ' + (isNursing(d) ? '시설' : '센터') + '의 모습과 다를 수 있습니다.</p>' : ''}
   </div>
 </section>`;
   const orgLink = '<p class="org-row"><a class="btn org" href="https://www.longtermcare.or.kr" target="_blank" rel="noopener">노인장기요양 기관정보 확인</a></p>';
