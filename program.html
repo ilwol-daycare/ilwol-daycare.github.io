@@ -999,6 +999,12 @@ window.CENTER = {"feeYear":2026,"rateSnapshot":{"day":[[41820,56060,69730],[3872
     .gal.facility-card .facility-zoom .facility-zoom-hint { top: 20px; right: 24px; bottom: auto; }
     .gal.facility-card .facility-zoom .facility-zoom-hint.is-circle { width: 46px; height: 46px; }
     .gal.facility-card .fac-dots { bottom: 24px; width: 260px; }
+    /* 4:3처럼 세로가 긴 시설 사진(가로÷세로 1.6 미만)은 사진 모양 그대로 가운데에 (2026-11-28 사용자 선택 '화면을 사진에 맞추기').
+       화면 가득 넓은 상자에서는 위아래가 31~40% 잘렸다. 16:9 사진은 지금처럼 화면 가득. fac-fit·--fac-r 은 아래 사진 넘기기 코드가 붙인다 */
+    .gal.facility-card.fac-fit { width: min(100%, calc((100vh - 152px) * var(--fac-r))); width: min(100%, calc((100svh - 152px) * var(--fac-r))); margin-inline: auto; }
+    .gal.facility-card.fac-fit .facility-carousel { width: 100%; margin-inline: 0; border-radius: 14px; }
+    .gal.facility-card.fac-fit .facility-zoom { height: auto; aspect-ratio: var(--fac-r); max-height: calc(100vh - 152px); max-height: calc(100svh - 152px); }
+    .gal.facility-card.fac-fit .fac-dots { left: auto; right: 28px; width: 220px; transform: none; }   /* 칸이 좁아져 가운데 막대가 이름표에 가리지 않게 오른쪽 아래로 */
   }
   /* 눈에 띄어야 하는 단추: 테마의 밝은 강조색 */
   .btn.accent { background: var(--photo-4); border-color: var(--photo-4); color: var(--photo-4-text); }
@@ -1857,6 +1863,12 @@ window.CENTER = {"feeYear":2026,"rateSnapshot":{"day":[[41820,56060,69730],[3872
 /* Facility photo carousel and enlargement. */
 (function(){
  var dialog,viewer,title,count,nav,trigger,previousOverflow,photos=[],index=0,swipeStart=null,suppressClickUntil=0;
+ /* 시설 사진 모양: 첫 사진이 4:3처럼 세로가 길면(가로÷세로 1.6 미만) 컴퓨터에서 상자를 사진 비율에 맞춘다 (2026-11-28) */
+ Array.prototype.forEach.call(document.querySelectorAll('.gal.facility-card'),function(card){
+  var image=card.querySelector('.facility-photo');if(!image)return;
+  function fit(){var r=image.naturalWidth/image.naturalHeight;if(r&&r<1.6){card.style.setProperty('--fac-r',r.toFixed(3));card.classList.add('fac-fit');}}
+  if(image.complete&&image.naturalWidth)fit();else image.addEventListener('load',fit,{once:true});
+ });
  function setSlide(carousel,n){
   if(!carousel)return;
   var slides=Array.from(carousel.querySelectorAll('.facility-slide'));
